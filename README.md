@@ -31,7 +31,7 @@ La API para tu restaurant: permite administrar una lista de usuarios, platos y p
 ***
 
 ### Para ejecutar la API
-Iniciarlizar el servidor a través del siguiente comando:
+Inicializar el servidor a través del siguiente comando:
 > cd ..
 > cd ..
 > cd server
