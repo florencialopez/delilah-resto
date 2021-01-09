@@ -13,7 +13,7 @@ La API para tu restaurant: permite administrar una lista de usuarios, platos y p
 
 ### Para empezar
 #### Clonar el respositorio
-> git clone https://github.com/NoelBq/delilah-resto.git
+> git clone https://github.com/florencialopez/delilah-resto
 
 #### Instalar las dependencias de NodeJS
 > npm install
