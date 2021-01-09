@@ -1,0 +1,516 @@
+swagger: "2.0"
+info:
+  title: "Delilah Restó API"
+  version: "1.0.0"
+  description: "Este documento contiene las especificaciones para utilizar la API de Delilah Restó."
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "delilahresto.swagger.io"
+
+paths:
+  /register:
+    post:
+      summary: "Registra un usuario nuevo."
+      consumes:
+      - "application/json"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Propiedades del usuario a crear (object). Si no es usuario administrador, omitir la propiedad 'admin'."
+        required: true
+        schema:
+          $ref: "#/definitions/usuario"
+      responses:
+        201:
+          description: "Usuario creado exitosamente."
+        400:
+          description: "Faltan datos obligatorios."
+        409:
+          description: "Usuario o email ya registrados / Usuario existente. Elija otro nombre de usuario. / La contraseña debe tener al menos 8 caracteres, con al menos una mayúscula, un número y un caracter especial. / Ingrese un email válido."
+        500:
+          description: "Se ha producido un error."
+
+          
+  /login:
+    post:
+      summary: "Inicia sesión de un usuario existente."
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Usuario y contraseña para iniciar sesión."
+        required: true
+        schema:
+            $ref: "#/definitions/usuario_login"
+      responses:
+        200:
+          description: "Inicio de sesión correcto."
+          schema:
+            type: "string"
+            example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjoiZmxvcmVuY2lhXzEiLCJhZG1pbiI6MCwiaWRfY2xpZW50ZSI6MTksImlhdCI6MTYwOTgxNzc4MH0.zufa7dy9Qn-ice8cBUSEL54tMzIwW6JOakFi3dGTuLM"
+        400:
+          description: "Usuario o contraseña incorrectos."
+
+
+  /users:
+    get:
+      summary: "Devuelve la lista de usuarios."
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authorization Token (usuario administrador)"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "Respuesta exitosa."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/usuarios"
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        403:
+          description: "Usuario sin permisos para realizar la acción."
+
+  /products:
+    get:
+      summary: "Devuelve la lista de productos."
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Respuesta exitosa."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/plato"
+
+    post:
+      summary: "Agrega un nuevo producto a la lista del shop online."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authorization Token (usuario administrador)"
+        type: "string"
+        required: true
+      - in: "body"
+        name: "body"
+        description: "Propiedades del producto a ingresar (object)."
+        required: true
+        schema:
+            $ref: "#/definitions/plato_post"
+      responses:
+        201:
+          description: "Producto agregado correctamente."
+        400:
+          description: "Faltan datos obligatorios."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        403:
+          description: "Usuario sin permisos para realizar la acción."
+        409:
+          description: "Producto ya existente."
+
+  /products/{idPlato}:
+    put:
+      summary: "Edita un producto."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authorization Token (usuario administrador)"
+        type: "string"
+        required: true
+      - in: "path"
+        name: "idPlato"
+        description: "ID del producto a editar."
+        type: "number"
+        format: "integer"
+        required: true
+      - in: "body"
+        name: "body"
+        description: "Propiedades del producto a editar (object)."
+        required: true
+        schema:
+          $ref: "#/definitions/plato_post"
+      responses:
+        202:
+          description: "Producto editado correctamente."
+        400:
+          description: "Faltan datos obligatorios."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        403:
+          description: "Usuario sin permisos para realizar la acción."
+        409:
+          description: "Producto no existente."
+    
+    delete:
+      summary: "Elimina un producto."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authorization Token (usuario administrador)"
+        type: "string"
+        required: true
+      - in: "path"
+        name: "idPlato"
+        description: "ID del producto a eliminar."
+        type: "number"
+        format: "integer"
+        required: true
+      responses:
+        204:
+          description: "Producto eliminado correctamente."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        403:
+          description: "Usuario sin permisos para realizar la acción."
+        409:
+          description: "Producto inexistente."
+
+
+  /orders:
+    get:
+      summary: "Devuelve los pedidos."
+      description: "Usuario admin: todos los pedidos / Usuario (no admin): solo los pedidos hechos por ese usuario."
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authentication Token"
+        type: "string"
+        required: true
+      responses:
+        200:
+          description: "Respuesta exitosa."
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/pedido_cargado"
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+
+    post:
+      summary: "Agrega un nuevo pedido a la lista."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authentication Token"
+        type: "string"
+        required: true
+      - in: "body"
+        name: "body"
+        description: "Propiedades del pedido a realizar (object)."
+        required: true
+        schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/pedido"
+      responses:
+        200:
+          description: "Pedido realizado correctamente."
+        400:
+          description: "Faltan datos obligatorios."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+
+  /orders/{idPedido}:
+    put:
+      summary: "Edita una orden."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authentication Token"
+        type: "string"
+        required: true
+      - in: "path"
+        name: "idPedido"
+        description: "ID del pedido a editar."
+        type: "number"
+        format: "integer"
+        required: true
+      - in: "body"
+        name: "body"
+        description: "Propiedades del pedido a editar (object)."
+        required: true
+        schema:
+          $ref: "#/definitions/detalle_pedido_editar"
+      responses:
+        202:
+          description: "Pedido editado exitosamente."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        409:
+          description: "Pedido inexistente."
+        
+    delete:
+      summary: "Elimina una orden."
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authentication Token"
+        type: "string"
+        required: true
+      - in: "path"
+        name: "idPedido"
+        description: "ID del pedido a eliminar."
+        type: "number"
+        format: "integer"
+        required: true
+      responses:
+        204:
+          description: "Pedido eliminado exitosamente."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        409:
+          description: "Pedido inexistente."
+
+  /orders/status/{idPedido}:
+    put:
+      summary: "Edita el estado de un pedido."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "header"
+        name: "authorization"
+        description: "Authorization Token (usuario administrador)"
+        type: "string"
+        required: true
+      - in: "path"
+        name: "idPedido"
+        description: "ID del pedido a editar."
+        type: "number"
+        format: "integer"
+        required: true
+      - in: "body"
+        name: "body"
+        description: "Propiedad del estado de pedido a editar (objetc)."
+        required: true
+        schema:
+          $ref: "#/definitions/estado_pedido"
+      responses:
+        202:
+          description: "Estado del pedido editado correctamente."
+        401:
+          description: "Error de autenticación: vuelva a iniciar sesión."
+        403:
+          description: "Usuario sin permisos para realizar la acción."
+        409:
+          description: "Pedido inexistente."
+
+
+definitions:
+  usuario:
+    properties: 
+      usuario:
+        type: "string"
+        example: "florencia_01"
+      nombre_apellido:
+        type: "string"
+        example: "Florencia López"
+      email:
+        type: "string"
+        example: "florencia@gmail.com"
+      tel:
+        type: "string"
+        example: "87654321"
+      direccion:
+        type: "string"
+        example: "Calle 123"
+      contrasena:
+        type: "string"
+        example: "Hola1234?*"
+      admin:
+        type: "number"
+        example: "1"
+
+  usuarios:
+    properties: 
+      id_cliente:
+        type: "number"
+        example: 1
+      usuario:
+        type: "string"
+        example: "florencia_01"
+      nombre_apellido:
+        type: "string"
+        example: "Florencia López"
+      email:
+        type: "string"
+        example: "florencia@gmail.com"
+      tel:
+        type: "string"
+        example: 87654321
+      direccion:
+        type: "string"
+        example: "Calle 123"
+      contrasena:
+        type: "string"
+        example: "Hola1234?*"
+      admin:
+        type: "number"
+        example: 0
+
+  usuario_login:
+    properties: 
+      usuario:
+        type: "string"
+        example: "florencia_01"
+      contrasena:
+        type: "string"
+        example: "Hola1234?*"
+
+  plato:
+    type: "object"
+    required:
+      - "descripcion"
+      - "precio"
+      - "imagen"
+    properties:
+      id_plato:
+        type: "number"
+        example: 1
+      descripcion:
+        type: "string"
+        example: "Hamburguesa"
+      precio:
+        type: "number"
+        example: 350
+      imagen:
+        type: "string"
+        example: "http://www.products.com/photo"
+
+  plato_post:
+    type: "object"
+    required:
+      - "descripcion"
+      - "precio"
+      - "imagen"
+    properties:
+      descripcion:
+        type: "string"
+        example: "Hamburguesa"
+      precio:
+        type: "number"
+        example: 350
+      imagen:
+        type: "string"
+        example: "http://www.products.com/photo"
+
+  pedido:
+    type: "object"
+    properties:
+      id_cliente:
+        type: "number"
+        example: 9
+      id_forma_pago:
+        type: "number"
+        example: 1
+      productos:
+        type: "array"
+        items:
+          $ref: "#/definitions/detalle_pedido"
+
+  detalle_pedido:
+    type: object
+    properties:
+      id_plato:
+        type: "number"
+        example: 3
+      cantidad:
+        type: "number"
+        example: 2
+
+  pedido_cargado:
+    type: "object"
+    properties:
+      id_pedido:
+        type: "integer"
+        example: 10
+      fecha_hora:
+        type: "string"
+        example: "2020-08-26 00:33:42"
+      descripcion:
+        type: "string"
+        example: "2x Hamburguesa completa"
+      precio_total:
+        type: "number"
+        example: 800
+      usuario:
+        type: "string"
+        example: "freddy_mercury"
+      nombre_apellido:
+        type: "string"
+        example: "Freddy Mercury"
+      direccion:
+        type: "string"
+        example: "1° de marzo 1338, Llavallol, Bs. As."
+      forma_pago:
+        type: "string"
+        example: "Efectivo"
+      estado_pedido:
+        type: "string"
+        example: "Nuevo"
+      productos:
+        type: "array"
+        items:
+          $ref: "#/definitions/detalle_pedido_cargado"
+
+  detalle_pedido_cargado:
+    type: "object"
+    properties:
+      descripcion:
+        type: "string"
+        example: "Hamburguesa"
+      imagen:
+        type: "string"
+        example: "http://www.products.com/photo"
+      cantidad:
+        type: "number"
+        example: 2
+      precio:
+        type: "number"
+        example: 350
+
+  detalle_pedido_editar:
+    type: object
+    properties:
+      productos:
+        type: "array"
+        items:
+          $ref: "#/definitions/detalle_pedido"
+
+  estado_pedido:
+    type: object
+    properties:
+      id_estado:
+        type: "number"
+        example: 2

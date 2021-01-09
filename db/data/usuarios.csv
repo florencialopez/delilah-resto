@@ -1,0 +1,3 @@
+usuario,nombre_apellido,email,tel,direccion,contrasena,admin
+admin,Florencia López,florencia@delilah.com,87654321,Sarmiento 138,Admin1234*?,1
+user,Florencia Gómez,florencia@gmail.com,12345678,Querendíes 453,Hola1234*?,0
